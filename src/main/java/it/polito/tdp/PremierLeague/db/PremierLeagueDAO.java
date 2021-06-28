@@ -5,33 +5,31 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.PremierLeague.model.Action;
 import it.polito.tdp.PremierLeague.model.Player;
 
 public class PremierLeagueDAO {
 	
-	public List<Player> listAllPlayers(){
+	public void listAllPlayers(Map<Integer, Player> mapPlayer) {
 		String sql = "SELECT * FROM Players";
-		List<Player> result = new ArrayList<Player>();
 		Connection conn = DBConnect.getConnection();
-
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
-
-				Player player = new Player(res.getInt("PlayerID"), res.getString("Name"));
-				
-				result.add(player);
+				if (!mapPlayer.containsKey("PlayerID")) {
+					Player player = new Player(res.getInt("PlayerID"), res.getString("Name"));
+					mapPlayer.put(player.getPlayerID(), player);
+				}
 			}
 			conn.close();
-			return result;
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
 		}
 	}
 	
@@ -55,6 +53,31 @@ public class PremierLeagueDAO {
 			return result;
 			
 		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public List<Player> listPlayerMajorAvg(Map<Integer, Player> mapPlayer, Integer x) {
+		String sql ="SELECT p.PlayerID, p.Name "
+				+ "FROM players p, actions a "
+				+ "WHERE p.PlayerID = a.PlayerID "
+				+ "GROUP BY p.PlayerID "
+				+ "HAVING  AVG (a.Goals) > ? ";
+		List<Player> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, x);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				Player player = new Player(res.getInt("PlayerID"),res.getString("Name"));
+				result.add(player);
+			}
+			conn.close();
+			return result;			
+		}catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
