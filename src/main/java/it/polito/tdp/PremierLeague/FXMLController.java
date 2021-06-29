@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Opponents;
+import it.polito.tdp.PremierLeague.model.TopPlayer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -44,6 +46,18 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	txtResult.clear();
+    	Double x = null;
+    	try {
+    		x = Double.parseDouble(txtGoals.getText());
+    	} catch (NumberFormatException e) {
+    		txtResult.appendText("Inserire un numero minimo di goal nel formato corretto");
+    		return;
+    	}
+    	this.model.creaGrafo(x);
+    	txtResult.appendText("Grafo creato\n");
+    	txtResult.appendText("# VERTICI: " + this.model.nVertici() + "\n");
+    	txtResult.appendText("# ARCHI: " + this.model.nArchi());
 
     }
 
@@ -54,6 +68,20 @@ public class FXMLController {
 
     @FXML
     void doTopPlayer(ActionEvent event) {
+    	txtResult.clear();
+    	TopPlayer topPlayer = this.model.getTopPlayer();
+    	if(topPlayer == null) {
+    		txtResult.appendText("Crea il grafo!");
+    		return;
+    	}
+    	
+    	txtResult.appendText("TOP PLAYER: " + topPlayer.getPlayer().toString());
+    	txtResult.appendText("\n\nAVVERSARI BATTUTI:\n");
+    	
+    	for(Opponents o : topPlayer.getOpponents()) {
+    		txtResult.appendText(o.toString() + "\n");
+    	}
+
 
     }
 
